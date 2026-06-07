@@ -11,7 +11,7 @@ from models import LoginRequest, RegisterRequest, UserOut
 router = APIRouter(prefix="/auth", tags=["auth"])
 security = HTTPBearer(auto_error=False)
 
-JWT_SECRET = os.getenv("JWT_SECRET", "murmur-nights-dev-secret-change-in-production")
+JWT_SECRET = os.getenv("JWT_SECRET") or secrets.token_hex(32)
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRE_HOURS = 72
 
