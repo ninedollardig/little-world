@@ -2,21 +2,23 @@ import os
 import uuid
 import mimetypes
 from pathlib import Path
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Request, Depends
-from fastapi.responses import StreamingResponse
+from flask import Blueprint, request, jsonify, current_app, Response, g
 from database import get_db
-from routes.auth import get_current_user, get_optional_user
+from routes.auth import login_required
 
-router = APIRouter(prefix="/audio", tags=["audio"])
-
-UPLOAD_DIR = Path(__file__).parent.parent / "uploads" / "audio"
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+bp = Blueprint("audio", __name__)
 
 ALLOWED_TYPES = {
     "audio/mpeg", "audio/mp3", "audio/wav", "audio/wave",
     "audio/ogg", "audio/flac", "audio/x-m4a", "audio/mp4",
     "audio/aac", "audio/webm",
 }
+
+
+def _upload_dir():
+    d = current_app.config["UPLOAD_DIR"]
+    d.mkdir(parents=True, exist_ok=True)
+    return d
 
 
 def _row_to_dict(row):
@@ -34,8 +36,10 @@ def _row_to_dict(row):
     }
 
 
-@router.get("")
-def list_audios(page: int = 1, limit: int = 20):
+@bp.route("/audio", methods=["GET"])
+def list_audios():
+    page = request.args.get("page", 1, type=int)
+    limit = request.args.get("limit", 20, type=int)
     offset = (page - 1) * limit
     conn = get_db()
     total = conn.execute("SELECT COUNT(*) FROM audios").fetchone()[0]
@@ -47,11 +51,11 @@ def list_audios(page: int = 1, limit: int = 20):
     ).fetchall()
     conn.close()
     items = [_row_to_dict(r) for r in rows]
-    return {"items": items, "total": total, "page": page, "limit": limit}
+    return jsonify({"items": items, "total": total, "page": page, "limit": limit})
 
 
-@router.get("/{audio_id}")
-def get_audio(audio_id: int):
+@bp.route("/audio/<int:audio_id>", methods=["GET"])
+def get_audio(audio_id):
     conn = get_db()
     row = conn.execute(
         """SELECT a.*, u.username FROM audios a
@@ -60,36 +64,35 @@ def get_audio(audio_id: int):
     ).fetchone()
     conn.close()
     if not row:
-        raise HTTPException(404, "Audio not found")
-    return _row_to_dict(row)
+        return jsonify({"detail": "Audio not found"}), 404
+    return jsonify(_row_to_dict(row))
 
 
-@router.post("", status_code=201)
-async def upload_audio(
-    file: UploadFile = File(...),
-    title: str = Form(""),
-    description: str = Form(""),
-    user: dict = Depends(get_current_user),
-):
-    mime_type = file.content_type or mimetypes.guess_type(file.filename or "")[0] or "audio/mpeg"
+@bp.route("/audio", methods=["POST"])
+@login_required
+def upload_audio():
+    file = request.files.get("file")
+    if not file or not file.filename:
+        return jsonify({"detail": "请选择音频文件"}), 400
+
+    mime_type = file.content_type or mimetypes.guess_type(file.filename)[0] or "audio/mpeg"
     if mime_type not in ALLOWED_TYPES:
-        raise HTTPException(400, f"Unsupported audio format: {mime_type}")
+        return jsonify({"detail": f"不支持的格式: {mime_type}"}), 400
 
-    ext = Path(file.filename).suffix if file.filename else ".mp3"
+    ext = Path(file.filename).suffix or ".mp3"
     safe_filename = f"{uuid.uuid4()}{ext}"
-    file_path = UPLOAD_DIR / safe_filename
+    file_path = _upload_dir() / safe_filename
+    file.save(str(file_path))
+    file_size = file_path.stat().st_size
 
-    content = await file.read()
-    file_size = len(content)
-
-    with open(file_path, "wb") as f:
-        f.write(content)
+    title = request.form.get("title", "").strip()
+    description = request.form.get("description", "").strip()
 
     conn = get_db()
     cur = conn.execute(
         """INSERT INTO audios (title, description, filename, original_name, file_size, mime_type, user_id)
            VALUES (?, ?, ?, ?, ?, ?, ?)""",
-        (title.strip(), description.strip(), safe_filename, file.filename or "unknown", file_size, mime_type, user["id"]),
+        (title, description, safe_filename, file.filename, file_size, mime_type, g.user["id"]),
     )
     conn.commit()
     row = conn.execute(
@@ -98,21 +101,22 @@ async def upload_audio(
            WHERE a.id = ?""", (cur.lastrowid,),
     ).fetchone()
     conn.close()
-    return _row_to_dict(row)
+    return jsonify(_row_to_dict(row)), 201
 
 
-@router.delete("/{audio_id}")
-def delete_audio(audio_id: int, user: dict = Depends(get_current_user)):
+@bp.route("/audio/<int:audio_id>", methods=["DELETE"])
+@login_required
+def delete_audio(audio_id):
     conn = get_db()
     row = conn.execute("SELECT filename, user_id FROM audios WHERE id = ?", (audio_id,)).fetchone()
     if not row:
         conn.close()
-        raise HTTPException(404, "Audio not found")
-    if row["user_id"] != user["id"]:
+        return jsonify({"detail": "Audio not found"}), 404
+    if row["user_id"] != g.user["id"]:
         conn.close()
-        raise HTTPException(403, "只能删除自己的音频")
+        return jsonify({"detail": "只能删除自己的音频"}), 403
 
-    file_path = UPLOAD_DIR / row["filename"]
+    file_path = _upload_dir() / row["filename"]
     conn.execute("DELETE FROM audios WHERE id = ?", (audio_id,))
     conn.commit()
     conn.close()
@@ -123,25 +127,25 @@ def delete_audio(audio_id: int, user: dict = Depends(get_current_user)):
     except OSError:
         pass
 
-    return {"message": "deleted"}
+    return jsonify({"message": "deleted"})
 
 
-@router.get("/{audio_id}/stream")
-def stream_audio(audio_id: int, request: Request):
+@bp.route("/audio/<int:audio_id>/stream", methods=["GET"])
+def stream_audio(audio_id):
     conn = get_db()
     row = conn.execute("SELECT filename, mime_type, file_size FROM audios WHERE id = ?", (audio_id,)).fetchone()
     conn.close()
     if not row:
-        raise HTTPException(404, "Audio not found")
+        return jsonify({"detail": "Audio not found"}), 404
 
-    file_path = UPLOAD_DIR / row["filename"]
+    file_path = _upload_dir() / row["filename"]
     if not file_path.exists():
-        raise HTTPException(404, "Audio file not found on disk")
+        return jsonify({"detail": "Audio file not found on disk"}), 404
 
     file_size = file_path.stat().st_size
     mime_type = row["mime_type"] or "audio/mpeg"
 
-    range_header = request.headers.get("range")
+    range_header = request.headers.get("Range")
     start = 0
     end = file_size - 1
 
@@ -150,24 +154,10 @@ def stream_audio(audio_id: int, request: Request):
         parts = range_str.split("-")
         start = int(parts[0]) if parts[0] else 0
         end = int(parts[1]) if len(parts) > 1 and parts[1] else file_size - 1
-    else:
-        def full_generator():
-            with open(file_path, "rb") as f:
-                while chunk := f.read(64 * 1024):
-                    yield chunk
-
-        return StreamingResponse(
-            full_generator(),
-            media_type=mime_type,
-            headers={
-                "Content-Length": str(file_size),
-                "Accept-Ranges": "bytes",
-            },
-        )
 
     content_length = end - start + 1
 
-    def ranged_generator():
+    def generate():
         with open(file_path, "rb") as f:
             f.seek(start)
             remaining = content_length
@@ -179,13 +169,14 @@ def stream_audio(audio_id: int, request: Request):
                 remaining -= len(data)
                 yield data
 
-    return StreamingResponse(
-        ranged_generator(),
-        status_code=206,
-        media_type=mime_type,
-        headers={
-            "Content-Range": f"bytes {start}-{end}/{file_size}",
-            "Content-Length": str(content_length),
-            "Accept-Ranges": "bytes",
-        },
-    )
+    headers = {
+        "Content-Length": str(content_length),
+        "Accept-Ranges": "bytes",
+        "Content-Type": mime_type,
+    }
+    status = 200
+    if range_header:
+        headers["Content-Range"] = f"bytes {start}-{end}/{file_size}"
+        status = 206
+
+    return Response(generate(), status=status, headers=headers)

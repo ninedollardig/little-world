@@ -1,19 +1,12 @@
-import os
 import hashlib
 import secrets
 from datetime import datetime, timedelta, timezone
 import jwt
-from fastapi import APIRouter, HTTPException, Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from functools import wraps
+from flask import Blueprint, request, jsonify, current_app, g
 from database import get_db
-from models import LoginRequest, RegisterRequest, UserOut
 
-router = APIRouter(prefix="/auth", tags=["auth"])
-security = HTTPBearer(auto_error=False)
-
-JWT_SECRET = os.getenv("JWT_SECRET") or secrets.token_hex(32)
-JWT_ALGORITHM = "HS256"
-JWT_EXPIRE_HOURS = 72
+bp = Blueprint("auth", __name__)
 
 
 def hash_password(password: str) -> str:
@@ -36,44 +29,49 @@ def create_token(user_id: int, username: str) -> str:
         "sub": str(user_id),
         "usr": username,
         "iat": datetime.now(timezone.utc),
-        "exp": datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRE_HOURS),
+        "exp": datetime.now(timezone.utc) + timedelta(hours=72),
     }
-    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    return jwt.encode(payload, current_app.config["JWT_SECRET"], algorithm="HS256")
 
 
-def get_current_user(credentials: HTTPAuthorizationCredentials | None = Depends(security)) -> dict | None:
-    """Returns user dict {id, username} or raises 401 if no valid token."""
-    if not credentials:
-        raise HTTPException(401, "请先登录")
+def parse_token(token: str) -> dict | None:
     try:
-        payload = jwt.decode(credentials.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        return {"id": int(payload["sub"]), "username": payload["usr"]}
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(401, "登录已过期，请重新登录")
-    except Exception:
-        raise HTTPException(401, "无效的登录凭证")
-
-
-def get_optional_user(credentials: HTTPAuthorizationCredentials | None = Depends(security)) -> dict | None:
-    """Returns user dict or None if no token provided."""
-    if not credentials:
-        return None
-    try:
-        payload = jwt.decode(credentials.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        payload = jwt.decode(token, current_app.config["JWT_SECRET"], algorithms=["HS256"])
         return {"id": int(payload["sub"]), "username": payload["usr"]}
     except Exception:
         return None
 
 
-@router.post("/login")
-def login(data: LoginRequest):
+def login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.headers.get("Authorization", "")
+        if not auth.startswith("Bearer "):
+            return jsonify({"detail": "请先登录"}), 401
+        user = parse_token(auth[7:])
+        if not user:
+            return jsonify({"detail": "登录已过期，请重新登录"}), 401
+        g.user = user
+        return f(*args, **kwargs)
+    return decorated
+
+
+@bp.route("/auth/login", methods=["POST"])
+def login():
+    data = request.get_json(silent=True) or {}
+    username = data.get("username", "").strip()
+    password = data.get("password", "")
+    if not username or not password:
+        return jsonify({"detail": "请输入用户名和密码"}), 400
+
     conn = get_db()
-    row = conn.execute("SELECT * FROM users WHERE username = ?", (data.username,)).fetchone()
+    row = conn.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
     conn.close()
-    if not row or not verify_password(data.password, row["password_hash"]):
-        raise HTTPException(401, "用户名或密码错误")
+    if not row or not verify_password(password, row["password_hash"]):
+        return jsonify({"detail": "用户名或密码错误"}), 401
+
     token = create_token(row["id"], row["username"])
-    return {
+    return jsonify({
         "token": token,
         "user": {
             "id": row["id"],
@@ -81,26 +79,37 @@ def login(data: LoginRequest):
             "display_name": row["display_name"],
             "created_at": row["created_at"],
         },
-    }
+    })
 
 
-@router.post("/register")
-def register(data: RegisterRequest):
+@bp.route("/auth/register", methods=["POST"])
+def register():
+    data = request.get_json(silent=True) or {}
+    username = data.get("username", "").strip()
+    password = data.get("password", "")
+    display_name = data.get("display_name", "").strip() or username
+    if not username or not password:
+        return jsonify({"detail": "请输入用户名和密码"}), 400
+    if len(username) < 2 or len(password) < 3:
+        return jsonify({"detail": "用户名至少2位，密码至少3位"}), 400
+
     conn = get_db()
-    existing = conn.execute("SELECT id FROM users WHERE username = ?", (data.username,)).fetchone()
+    existing = conn.execute("SELECT id FROM users WHERE username = ?", (username,)).fetchone()
     if existing:
         conn.close()
-        raise HTTPException(400, "用户名已存在")
-    h = hash_password(data.password)
+        return jsonify({"detail": "用户名已存在"}), 400
+
+    h = hash_password(password)
     cur = conn.execute(
         "INSERT INTO users (username, password_hash, display_name) VALUES (?, ?, ?)",
-        (data.username, h, data.display_name.strip() or data.username),
+        (username, h, display_name),
     )
     conn.commit()
     row = conn.execute("SELECT * FROM users WHERE id = ?", (cur.lastrowid,)).fetchone()
     conn.close()
+
     token = create_token(row["id"], row["username"])
-    return {
+    return jsonify({
         "token": token,
         "user": {
             "id": row["id"],
@@ -108,19 +117,20 @@ def register(data: RegisterRequest):
             "display_name": row["display_name"],
             "created_at": row["created_at"],
         },
-    }
+    }), 201
 
 
-@router.get("/me")
-def me(user: dict = Depends(get_current_user)):
+@bp.route("/auth/me", methods=["GET"])
+@login_required
+def me():
     conn = get_db()
-    row = conn.execute("SELECT * FROM users WHERE id = ?", (user["id"],)).fetchone()
+    row = conn.execute("SELECT * FROM users WHERE id = ?", (g.user["id"],)).fetchone()
     conn.close()
     if not row:
-        raise HTTPException(404, "用户不存在")
-    return {
+        return jsonify({"detail": "用户不存在"}), 404
+    return jsonify({
         "id": row["id"],
         "username": row["username"],
         "display_name": row["display_name"],
         "created_at": row["created_at"],
-    }
+    })
