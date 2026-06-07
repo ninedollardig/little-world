@@ -1,0 +1,23 @@
+app = "little-world"
+primary_region = "hkg"
+
+[build]
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1
+
+[mounts]
+  source = "little-world-data"
+  destination = "/app/data"
+
+[mounts]
+  source = "little-world-uploads"
+  destination = "/app/uploads"

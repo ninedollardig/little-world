@@ -1,4 +1,4 @@
-const BASE = import.meta.env.PROD ? 'https://little-world.fly.dev/api' : '/api'
+const BASE = '/api'
 
 const TOKEN_KEY = 'littleworld_token'
 
