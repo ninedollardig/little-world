@@ -1,0 +1,20 @@
+.env
+*.secret
+*.pem
+
+# Backend
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.pyc
+backend/uploads/audio/*
+!backend/uploads/audio/.gitkeep
+backend/uploads/images/*
+backend/data/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/

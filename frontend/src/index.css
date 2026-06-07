@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+@theme {
+  /* ── Morandi palette: muted, dusty, low-saturation ── */
+  --color-murmur-deep: #1c1a17;
+  --color-murmur-surface: #24211d;
+  --color-murmur-elevated: #2c2824;
+  --color-murmur-text: #e5e0d8;
+  --color-murmur-text-secondary: #a0988e;
+  --color-murmur-text-muted: #6b645c;
+  --color-murmur-accent: #c8a87c;
+  --color-murmur-accent-soft: #b8956e;
+  --color-murmur-accent-dim: #a0805e;
+  --color-murmur-danger: #c47a7a;
+  --color-murmur-success: #7a9a7a;
+  --color-murmur-border: rgba(255, 255, 255, 0.06);
+  --color-murmur-border-visible: rgba(255, 255, 255, 0.10);
+
+  /* Morandi card tints */
+  --color-card-rose: #3d2e2b;
+  --color-card-sage: #2e3530;
+  --color-card-blue: #2b2e36;
+  --color-card-lavender: #302d36;
+
+  --font-sans: 'Noto Serif SC', ui-serif, Georgia, serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-hand: 'Long Cang', cursive, 'Noto Serif SC', serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  background-color: var(--color-murmur-deep);
+  color: var(--color-murmur-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100dvh;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Painterly background — muted Morandi blobs */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.45;
+  background:
+    /* Dusty rose — top right */
+    radial-gradient(ellipse 600px 500px at 85% -20%, rgba(180, 140, 130, 0.10) 0%, transparent 70%),
+    /* Muted sage — top left */
+    radial-gradient(ellipse 400px 400px at 5% 5%, rgba(140, 155, 140, 0.08) 0%, transparent 70%),
+    /* Dusty blue — bottom right */
+    radial-gradient(ellipse 500px 500px at 90% 80%, rgba(130, 140, 165, 0.07) 0%, transparent 70%),
+    /* Muted lavender — bottom left */
+    radial-gradient(ellipse 450px 450px at 10% 90%, rgba(150, 140, 165, 0.08) 0%, transparent 70%),
+    /* Warm beige — center */
+    radial-gradient(ellipse 300px 300px at 50% 40%, rgba(190, 170, 150, 0.05) 0%, transparent 70%);
+}
+
+/* Canvas texture overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 3px; }
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.06); opacity: 1; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(200, 168, 124, 0.08); }
+  50% { box-shadow: 0 0 40px rgba(200, 168, 124, 0.18); }
+}
+
+.animate-breathe { animation: breathe 4s ease-in-out infinite; }
+.animate-fade-up { animation: fadeUp 0.6s ease-out forwards; }
+.animate-fade-in { animation: fadeIn 0.8s ease-out forwards; }
+.animate-glow { animation: glowPulse 3s ease-in-out infinite; }
+
+.stagger-1 { animation-delay: 0.1s; opacity: 0; }
+.stagger-2 { animation-delay: 0.2s; opacity: 0; }
+.stagger-3 { animation-delay: 0.3s; opacity: 0; }
+.stagger-4 { animation-delay: 0.4s; opacity: 0; }
+.stagger-5 { animation-delay: 0.5s; opacity: 0; }
