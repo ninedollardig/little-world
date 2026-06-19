@@ -30,7 +30,11 @@
 Fly.io（免费层 3GB 持久存储，适合 5 人小站）
 
 ### 部署状态
-⚠️ **待完成** — 等待绑定支付方式（免费层不扣费，但需要信用卡验证）
+✅ GitHub Pages 已上线 — `https://ninedollardig.github.io/little-world/`
+每次 push main 自动构建部署（`.github/workflows/deploy.yml`）
+
+### 待部署
+⚠️ 后端 Fly.io — 等待绑定支付方式
 
 ### 部署文件（已就绪）
 - `Dockerfile` — 多阶段构建（前端 npm build + 后端 Python/Flask）
