@@ -71,7 +71,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={submitting || !username.trim() || !password}
-          className="w-full py-4 bg-murmur-accent text-murmur-deep font-semibold rounded-2xl hover:bg-murmur-accent-soft transition-colors disabled:opacity-30"
+          className="w-full py-4 bg-murmur-accent text-white font-semibold rounded-2xl hover:bg-murmur-accent-soft transition-colors disabled:opacity-30"
         >
           {submitting ? '请稍候...' : mode === 'login' ? '登录' : '注册'}
         </button>

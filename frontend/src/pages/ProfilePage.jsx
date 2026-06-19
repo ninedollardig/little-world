@@ -36,7 +36,7 @@ export default function ProfilePage() {
         <p className="text-murmur-text-secondary mb-6">请先登录</p>
         <Link
           to="/login"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-murmur-accent text-murmur-deep font-semibold rounded-2xl hover:bg-murmur-accent-soft transition-colors text-sm"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-murmur-accent text-white font-semibold rounded-2xl hover:bg-murmur-accent-soft transition-colors text-sm"
         >
           去登录
         </Link>

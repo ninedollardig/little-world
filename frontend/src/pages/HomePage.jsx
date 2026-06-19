@@ -28,12 +28,12 @@ function cnDate(ymd) {
 /* ── Card palette ── */
 
 const cardTints = [
-  'bg-[#3b2a28] border-[#5a3a34]/25',   // dusty rose
-  'bg-[#2a332c] border-[#3d4a3a]/25',   // muted sage
-  'bg-[#282d38] border-[#384058]/25',   // dusk blue
-  'bg-[#3a2e28] border-[#544030]/25',   // warm clay
-  'bg-[#2d2835] border-[#403a52]/25',   // muted plum
-  'bg-[#28302e] border-[#3a4844]/25',   // celadon
+  'bg-glass-rose/80 backdrop-blur-xl border-white/30',
+  'bg-glass-lavender/80 backdrop-blur-xl border-white/30',
+  'bg-glass-peach/80 backdrop-blur-xl border-white/30',
+  'bg-glass-mint/80 backdrop-blur-xl border-white/30',
+  'bg-glass-sky/80 backdrop-blur-xl border-white/30',
+  'bg-glass-cream/80 backdrop-blur-xl border-white/30',
 ]
 
 /* ── Audio item inside card ── */
@@ -47,32 +47,32 @@ function AudioRow({ item, playlist }) {
   return (
     <div
       onClick={() => (isCurrent ? toggle() : load(item, playlist))}
-      className="flex items-center gap-4 py-4 px-1 cursor-pointer hover:bg-white/3 rounded-xl transition-colors -mx-1 group"
+      className="flex items-center gap-4 py-4 px-1 cursor-pointer hover:bg-white/20 rounded-xl transition-colors -mx-1 group"
     >
       <div className="relative w-10 h-10 rounded-full shrink-0 flex items-center justify-center"
         style={{
           background: isActive
-            ? 'repeating-radial-gradient(circle at center, #1a1a1a 0px, #1a1a1a 2px, #222 2px, #222 3px, #1a1a1a 3px, #1a1a1a 5px)'
-            : 'repeating-radial-gradient(circle at center, #1a1a1a 0px, #1a1a1a 1px, #1f1f1f 1px, #1f1f1f 2px, #1a1a1a 2px, #1a1a1a 3px)',
+            ? 'repeating-radial-gradient(circle at center, #2d1f2a 0px, #2d1f2a 2px, #3d2f3a 2px, #3d2f3a 3px, #2d1f2a 3px, #2d1f2a 5px)'
+            : 'repeating-radial-gradient(circle at center, #e8dde5 0px, #e8dde5 1px, #ddd2da 1px, #ddd2da 2px, #e8dde5 2px, #e8dde5 3px)',
           animation: isActive ? 'spin 3s linear infinite' : 'none',
-          boxShadow: isActive ? '0 0 14px rgba(200,168,124,0.2)' : 'none',
+          boxShadow: isActive ? '0 0 14px rgba(200,130,150,0.25)' : 'none',
         }}
       >
-        <div className="w-3.5 h-3.5 rounded-full bg-[#2a1f1a] border border-murmur-accent/20 flex items-center justify-center">
-          <MoonIcon size={7} className="text-murmur-accent/40" />
+        <div className="w-3.5 h-3.5 rounded-full bg-white/60 border border-murmur-accent/20 flex items-center justify-center">
+          <MoonIcon size={7} className="text-murmur-accent/50" />
         </div>
       </div>
 
       <div className="flex-1 min-w-0">
-        <h3 className={`text-[14px] leading-snug truncate ${isCurrent ? 'text-murmur-accent' : 'text-murmur-text/80'}`}>
+        <h3 className={`text-[14px] leading-snug truncate font-medium ${isCurrent ? 'text-murmur-accent' : 'text-murmur-text/80'}`}>
           {item.title}
         </h3>
         {item.description && (
-          <p className="text-murmur-text-muted/60 text-xs mt-0.5 truncate">{item.description}</p>
+          <p className="text-murmur-text-muted text-xs mt-0.5 truncate">{item.description}</p>
         )}
       </div>
 
-      <span className="text-murmur-text-muted/50 text-xs shrink-0">{time}</span>
+      <span className="text-murmur-text-muted/60 text-xs shrink-0">{time}</span>
     </div>
   )
 }
@@ -89,29 +89,33 @@ function PostRow({ item }) {
   return (
     <Link
       to={`/posts/${item.id}`}
-      className="flex items-start gap-4 py-4 px-1 hover:bg-white/3 rounded-xl transition-colors -mx-1 group"
+      className="block py-4 px-1 hover:bg-white/20 rounded-xl transition-colors -mx-1 group"
     >
-      <div className="w-10 h-10 rounded-xl bg-white/3 border border-white/5 flex items-center justify-center shrink-0 text-murmur-accent/40 text-base font-serif">
-        {mark || <MoonIcon size={14} className="text-murmur-text-muted/40" />}
-      </div>
-
-      <div className="flex-1 min-w-0">
-        {item.title ? (
-          <h3 className="text-[14px] font-medium leading-snug text-murmur-text/80 group-hover:text-murmur-text mb-0.5">
-            {item.title}
-          </h3>
-        ) : null}
-        <p className="text-murmur-text-secondary text-[13px] leading-relaxed line-clamp-2">
-          {item.content}
-        </p>
-      </div>
-
       {imageUrl && (
-        <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-white/5">
+        <div className="relative aspect-[4/3] w-1/2 rounded-2xl overflow-hidden border border-white/30 mb-4 shadow-sm">
           <img src={imageUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
+          <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-white/70 to-transparent pointer-events-none" />
         </div>
       )}
-      <span className="text-murmur-text-muted/50 text-xs shrink-0 mt-0.5">{time}</span>
+
+      <div className="flex items-start gap-4">
+        <div className="w-10 h-10 rounded-xl bg-white/40 border border-white/30 flex items-center justify-center shrink-0 text-murmur-accent/50 text-base font-serif">
+          {mark || <MoonIcon size={14} className="text-murmur-text-muted/40" />}
+        </div>
+
+        <div className="flex-1 min-w-0">
+          {item.title ? (
+            <h3 className="text-[14px] font-medium leading-snug text-murmur-text/80 group-hover:text-murmur-accent mb-0.5 transition-colors">
+              {item.title}
+            </h3>
+          ) : null}
+          <p className="text-murmur-text-secondary text-[13px] leading-relaxed line-clamp-2">
+            {item.content}
+          </p>
+        </div>
+
+        <span className="text-murmur-text-muted/60 text-xs shrink-0 mt-0.5">{time}</span>
+      </div>
     </Link>
   )
 }
@@ -179,31 +183,31 @@ export default function HomePage() {
   })
 
   return (
-    <div className="max-w-lg mx-auto px-5 pt-10 pb-8">
+    <div className="max-w-lg md:max-w-2xl lg:max-w-3xl mx-auto px-5 md:px-8 pt-10 pb-8">
       {/* ── Clock section ── */}
       <header className="flex flex-col items-center mb-12 animate-fade-in">
         <p className="text-murmur-text-muted/50 text-sm tracking-[0.3em] mb-2">
           {today.year}
         </p>
-        <p className="text-murmur-accent/40 text-xs tracking-[0.5em] mb-8">
+        <p className="text-murmur-accent/50 text-xs tracking-[0.5em] mb-8">
           {today.month.toUpperCase()}
         </p>
 
         <div className="relative mb-4">
-          <div className="absolute -inset-8 bg-murmur-accent/3 blur-3xl rounded-full" />
+          <div className="absolute -inset-8 bg-murmur-accent/8 blur-3xl rounded-full" />
           <time
-            className="relative text-8xl font-hand text-murmur-text tracking-widest select-none"
+            className="relative text-8xl font-hand text-murmur-text/90 tracking-widest select-none"
             style={{ fontFamily: 'var(--font-hand)' }}
           >
             {clock || '0'}
           </time>
         </div>
 
-        <p className="text-murmur-text-secondary text-sm tracking-wide mt-2">
+        <p className="text-murmur-text-secondary/80 text-sm tracking-wide mt-2">
           {today.day} &nbsp;·&nbsp; {today.weekday}
         </p>
 
-        <div className="flex items-center gap-5 mt-5 text-murmur-text-muted/20 text-xs">
+        <div className="flex items-center gap-5 mt-5 text-murmur-accent/25 text-xs">
           <span>˚</span><span>☁</span><span>✦</span><span>·</span><span>☽</span><span>✧</span>
         </div>
       </header>
@@ -219,7 +223,7 @@ export default function HomePage() {
             <p className="text-murmur-text-muted text-sm mb-8">上传第一段音频，或写下第一篇碎碎念</p>
             <Link
               to="/upload"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-murmur-accent text-murmur-deep font-semibold rounded-2xl hover:bg-murmur-accent-soft transition-colors text-sm"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-murmur-accent text-white font-semibold rounded-2xl hover:bg-murmur-accent-soft transition-colors text-sm"
             >
               开始创作 <ArrowRight size={16} />
             </Link>
@@ -230,8 +234,8 @@ export default function HomePage() {
               if (group.type === 'month-sep') {
                 return (
                   <div key={`month-${group.month}`} className="flex items-center justify-center py-8">
-                    <div className="px-8 py-3 rounded-3xl bg-murmur-surface/50 border border-murmur-border">
-                      <span className="text-murmur-accent/50 text-sm tracking-[0.3em] font-medium">
+                    <div className="glass-card px-8 py-3 rounded-3xl">
+                      <span className="text-murmur-accent/60 text-sm tracking-[0.3em] font-medium">
                         {group.month}
                       </span>
                     </div>
@@ -252,26 +256,26 @@ export default function HomePage() {
                     <h2 className="text-murmur-text text-xl font-semibold tracking-wide">
                       {group.info.day}
                     </h2>
-                    <p className="text-murmur-text-muted text-xs mt-1.5 tracking-wide">
+                    <p className="text-murmur-text-muted/70 text-xs mt-1.5 tracking-wide">
                       {group.info.weekday}
                       {isToday && (
-                        <span className="ml-2 text-murmur-accent/60">· 今天</span>
+                        <span className="ml-2 text-murmur-accent/70">· 今天</span>
                       )}
                     </p>
-                    <div className="w-8 h-px bg-murmur-border-visible mx-auto mt-4" />
+                    <div className="w-8 h-px bg-murmur-accent/15 mx-auto mt-4" />
                   </div>
 
                   {/* Cards */}
                   <div className="space-y-6">
                     {dayAudios.length > 0 && (
-                      <div className={`rounded-2xl border ${tint} overflow-hidden`}>
+                      <div className={`rounded-2xl overflow-hidden ${tint}`}>
                         <div className="px-5 pt-5 pb-1">
                           <div className="flex items-center gap-2.5 mb-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-murmur-accent/40" />
-                            <span className="text-xs tracking-[0.2em] text-murmur-text-muted/70 font-medium">音频</span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-murmur-accent/50" />
+                            <span className="text-xs tracking-[0.2em] text-murmur-text-muted font-medium">音频</span>
                           </div>
                         </div>
-                        <div className="px-5 pb-3 divide-y divide-white/5">
+                        <div className="px-5 pb-3 divide-y divide-murmur-border">
                           {dayAudios.map(item => (
                             <AudioRow key={item.id} item={item} playlist={audios} />
                           ))}
@@ -280,14 +284,14 @@ export default function HomePage() {
                     )}
 
                     {dayPosts.length > 0 && (
-                      <div className={`rounded-2xl border ${tint} overflow-hidden`}>
+                      <div className={`rounded-2xl overflow-hidden ${tint}`}>
                         <div className="px-5 pt-5 pb-1">
                           <div className="flex items-center gap-2.5 mb-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-murmur-accent/30" />
-                            <span className="text-xs tracking-[0.2em] text-murmur-text-muted/70 font-medium">碎碎念</span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-murmur-accent/40" />
+                            <span className="text-xs tracking-[0.2em] text-murmur-text-muted font-medium">碎碎念</span>
                           </div>
                         </div>
-                        <div className="px-5 pb-3 divide-y divide-white/5">
+                        <div className="px-5 pb-3 divide-y divide-murmur-border">
                           {dayPosts.map(item => (
                             <PostRow key={item.id} item={item} />
                           ))}

@@ -53,8 +53,8 @@ export default function VinylRecord({ spinning = false, size = 'lg', onClick }) 
           style={{
             width: dims.label,
             height: dims.label,
-            background: 'linear-gradient(135deg, #2a1f1a 0%, #3d2b20 50%, #2a1f1a 100%)',
-            border: '2px solid rgba(232,180,120,0.2)',
+            background: 'linear-gradient(135deg, #f0e5e8 0%, #e8d8de 50%, #f0e5e8 100%)',
+            border: '2px solid rgba(200,130,150,0.3)',
           }}
         >
           <MoonIcon
@@ -65,7 +65,7 @@ export default function VinylRecord({ spinning = false, size = 'lg', onClick }) 
 
         {/* Spindle hole */}
         <div
-          className="absolute rounded-full bg-murmur-deep"
+          className="absolute rounded-full bg-[#2d1f2a]"
           style={{
             width: dims.label * 0.12,
             height: dims.label * 0.12,

@@ -21,13 +21,11 @@ export default function AudioPlayer() {
       className="fixed bottom-14 left-0 right-0 z-40"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
-      <div className="absolute inset-0 bg-gradient-to-t from-murmur-accent/5 to-transparent pointer-events-none" />
-
-      <div className="bg-murmur-surface/95 backdrop-blur-xl border-t border-murmur-border">
+      <div className="bg-white/60 backdrop-blur-xl border-t border-murmur-border" style={{ boxShadow: '0 -4px 24px rgba(160,130,150,0.08)' }}>
         <div className="max-w-lg mx-auto">
           {/* Seekable progress */}
           <div
-            className="relative h-[3px] bg-murmur-border-visible cursor-pointer group"
+            className="relative h-[3px] bg-white/40 cursor-pointer group"
             onClick={(e) => {
               const rect = e.currentTarget.getBoundingClientRect()
               seek(((e.clientX - rect.left) / rect.width) * duration)

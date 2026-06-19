@@ -69,8 +69,16 @@ export const createPost = (formData) =>
     method: 'POST',
     headers: { 'Authorization': `Bearer ${getToken()}` },
     body: formData,
-  }).then((res) => {
-    if (!res.ok) throw new Error('Create failed')
+  }).then(async (res) => {
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Create failed' }))
+      if (res.status === 401) {
+        clearToken()
+        window.location.href = '/login'
+        throw new Error('请先登录')
+      }
+      throw new Error(err.detail || `HTTP ${res.status}`)
+    }
     return res.json()
   })
 
@@ -79,8 +87,16 @@ export const updatePost = (id, formData) =>
     method: 'PUT',
     headers: { 'Authorization': `Bearer ${getToken()}` },
     body: formData,
-  }).then((res) => {
-    if (!res.ok) throw new Error('Update failed')
+  }).then(async (res) => {
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Update failed' }))
+      if (res.status === 401) {
+        clearToken()
+        window.location.href = '/login'
+        throw new Error('请先登录')
+      }
+      throw new Error(err.detail || `HTTP ${res.status}`)
+    }
     return res.json()
   })
 

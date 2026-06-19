@@ -139,7 +139,7 @@ export default function PostDetailPage() {
               <button
                 type="button"
                 onClick={() => setEditImage(null)}
-                className="absolute top-3 right-3 p-2 rounded-xl bg-murmur-deep/70 text-murmur-text-secondary hover:text-murmur-danger backdrop-blur-sm transition-colors"
+                className="absolute top-3 right-3 p-2 rounded-xl bg-white/70 text-murmur-text-secondary hover:text-murmur-danger backdrop-blur-sm transition-colors"
               >
                 <X size={16} />
               </button>
@@ -154,7 +154,7 @@ export default function PostDetailPage() {
               <button
                 type="button"
                 onClick={() => setEditImage(null)}
-                className="absolute top-3 right-3 p-2 rounded-xl bg-murmur-deep/70 text-murmur-text-secondary hover:text-murmur-danger backdrop-blur-sm transition-colors text-xs"
+                className="absolute top-3 right-3 p-2 rounded-xl bg-white/70 text-murmur-text-secondary hover:text-murmur-danger backdrop-blur-sm transition-colors text-xs"
               >
                 保留原图
               </button>
@@ -198,7 +198,7 @@ export default function PostDetailPage() {
             <button
               onClick={handleSave}
               disabled={saving || !content.trim()}
-              className="px-8 py-3 bg-murmur-accent text-murmur-deep font-semibold rounded-2xl hover:bg-murmur-accent-soft transition-colors disabled:opacity-40 text-sm"
+              className="px-8 py-3 bg-murmur-accent text-white font-semibold rounded-2xl hover:bg-murmur-accent-soft transition-colors disabled:opacity-40 text-sm"
             >
               {saving ? '保存中...' : '保存'}
             </button>

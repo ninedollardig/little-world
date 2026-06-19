@@ -21,9 +21,10 @@ export default function App() {
           position="top-center"
           toastOptions={{
             style: {
-              background: '#24211d',
-              color: '#e5e0d8',
-              border: '1px solid rgba(255,255,255,0.06)',
+              background: 'rgba(255,255,255,0.75)',
+              color: '#2d1f2a',
+              border: '1px solid rgba(255,255,255,0.5)',
+              backdropFilter: 'blur(16px)',
             },
           }}
         />

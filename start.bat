@@ -21,7 +21,7 @@ if errorlevel 1 (
 
 echo [1/2] Starting backend on http://localhost:8765 ...
 cd /d "%~dp0backend"
-start "Backend" /min cmd /k python main.py
+start "Backend" /min cmd /k python app.py
 
 echo       Waiting...
 timeout /t 3 /nobreak >nul

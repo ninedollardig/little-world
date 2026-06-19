@@ -15,8 +15,8 @@ export default function NavBar() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 bg-murmur-surface/90 backdrop-blur-xl border-t border-murmur-border"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+      className="fixed bottom-0 left-0 right-0 z-50 bg-white/60 backdrop-blur-xl border-t border-murmur-border"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)', boxShadow: '0 -4px 24px rgba(160,130,150,0.06)' }}
     >
       <div className="max-w-lg mx-auto flex items-center justify-around h-14 px-1">
         {tabs.map(({ to, icon: Icon, label, isMoon }) => {
@@ -28,7 +28,7 @@ export default function NavBar() {
               className="relative flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-2xl transition-all duration-300"
             >
               {active && (
-                <span className="absolute inset-0 bg-murmur-accent/8 rounded-2xl" />
+                <span className="absolute inset-0 bg-murmur-accent/12 rounded-2xl" />
               )}
               {isMoon ? (
                 <MoonIcon

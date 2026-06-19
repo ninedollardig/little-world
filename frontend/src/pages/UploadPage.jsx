@@ -78,8 +78,8 @@ export default function UploadPage() {
       setPostEmotion('')
       setPostImage(null)
       navigate('/posts')
-    } catch {
-      toast.error('发布失败')
+    } catch (err) {
+      toast.error(err.message || '发布失败')
     } finally {
       setPosting(false)
     }
@@ -176,7 +176,7 @@ export default function UploadPage() {
           <button
             type="submit"
             disabled={uploading || !audioFile || !audioTitle.trim()}
-            className="w-full py-4 bg-murmur-accent text-murmur-deep font-semibold rounded-2xl hover:bg-murmur-accent-soft transition-colors disabled:opacity-30 text-[15px]"
+            className="w-full py-4 bg-murmur-accent text-white font-semibold rounded-2xl hover:bg-murmur-accent-soft transition-colors disabled:opacity-30 text-[15px]"
           >
             {uploading ? '上传中...' : '保存音频'}
           </button>
@@ -211,7 +211,7 @@ export default function UploadPage() {
               <button
                 type="button"
                 onClick={() => setPostImage(null)}
-                className="absolute top-3 right-3 p-2 rounded-xl bg-murmur-deep/70 text-murmur-text-secondary hover:text-murmur-danger backdrop-blur-sm transition-colors"
+                className="absolute top-3 right-3 p-2 rounded-xl bg-white/70 text-murmur-text-secondary hover:text-murmur-danger backdrop-blur-sm transition-colors"
               >
                 <X size={16} />
               </button>
@@ -255,7 +255,7 @@ export default function UploadPage() {
           <button
             type="submit"
             disabled={posting || !postContent.trim()}
-            className="w-full py-4 bg-murmur-accent text-murmur-deep font-semibold rounded-2xl hover:bg-murmur-accent-soft transition-colors disabled:opacity-30 text-[15px]"
+            className="w-full py-4 bg-murmur-accent text-white font-semibold rounded-2xl hover:bg-murmur-accent-soft transition-colors disabled:opacity-30 text-[15px]"
           >
             {posting ? '发布中...' : '发布碎碎念'}
           </button>

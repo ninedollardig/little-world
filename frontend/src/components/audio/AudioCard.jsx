@@ -22,8 +22,8 @@ export default function AudioCard({ audio, playlist = null }) {
       onClick={handleClick}
       className={`group flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all duration-500 ${
         isCurrent
-          ? 'bg-murmur-accent/5 border border-murmur-accent/15 shadow-[0_0_30px_rgba(232,180,120,0.06)]'
-          : 'bg-murmur-surface/80 border border-transparent hover:bg-murmur-surface hover:border-murmur-border'
+          ? 'bg-murmur-accent/8 border border-murmur-accent/20 shadow-[0_0_30px_rgba(200,130,150,0.10)]'
+          : 'bg-white/30 backdrop-blur-md border border-white/20 hover:bg-white/50 hover:border-murmur-accent/15 hover:shadow-md'
       }`}
     >
       <div className="relative shrink-0">
@@ -34,7 +34,7 @@ export default function AudioCard({ audio, playlist = null }) {
           className={`relative w-11 h-11 rounded-full flex items-center justify-center transition-all duration-500 ${
             isCurrent
               ? 'bg-murmur-accent/15 text-murmur-accent'
-              : 'bg-murmur-surface text-murmur-text-muted group-hover:text-murmur-accent group-hover:bg-murmur-accent/10'
+              : 'bg-white/50 text-murmur-text-muted group-hover:text-murmur-accent group-hover:bg-murmur-accent/8'
           } ${isCurrent && isPlaying ? 'animate-breathe' : ''}`}
         >
           {isCurrent && isPlaying ? (
@@ -61,7 +61,7 @@ export default function AudioCard({ audio, playlist = null }) {
           {[0.6, 1, 0.4, 0.8, 0.5].map((h, i) => (
             <span
               key={i}
-              className="w-[2px] bg-murmur-accent/60 rounded-full"
+              className="w-[2px] bg-murmur-accent/50 rounded-full"
               style={{
                 height: `${h * 100}%`,
                 animation: `breathe ${1.2 + i * 0.2}s ease-in-out infinite`,

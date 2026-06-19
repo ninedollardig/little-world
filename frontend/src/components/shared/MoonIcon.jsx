@@ -11,8 +11,8 @@ export default function MoonIcon({ size = 24, className = '', glow = false }) {
       {glow && (
         <defs>
           <radialGradient id="moonGlow" cx="50%" cy="40%" r="50%">
-            <stop offset="0%" stopColor="var(--color-murmur-accent, #e8b478)" stopOpacity="0.25" />
-            <stop offset="100%" stopColor="var(--color-murmur-accent, #e8b478)" stopOpacity="0" />
+            <stop offset="0%" stopColor="var(--color-murmur-accent, #c47a96)" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="var(--color-murmur-accent, #c47a96)" stopOpacity="0" />
           </radialGradient>
         </defs>
       )}

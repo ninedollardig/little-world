@@ -1,6 +1,44 @@
 # 小世界 · A Little World 项目日志
 
+## 2026-06-09
+- 修复发布碎碎念失败：
+  - `start.bat` 仍引用已删除的 `main.py`（Flask 迁移时改为 `app.py`），导致一键启动时后端无法运行
+  - `createPost`/`updatePost` 缺少 401 登录过期处理（token 过期时吞掉错误，只显示泛化"发布失败"），改为复用 `request()` 的错误处理模式：读取后端返回的具体错误信息、401 时自动清 token 跳转登录
+  - `UploadPage` 发布失败 toast 改为显示后端实际错误消息，不再硬编码"发布失败"
+- 碎碎念列表（/posts）从单列纵向排列改为 CSS columns masonry 瀑布流布局：`column-width: 300px` 自动适配列数，`break-inside: avoid` 防止卡片被截断，容器从 `max-w-lg` 扩至 `max-w-6xl`
+
+### 玻璃态浅色主题（Glassmorphism Light）
+- 全局色彩：暗黑手稿风 → 粉紫渐变浅色（#f7f2f0 底，玫瑰粉 accent #c47a96）
+- 字体：Noto Serif SC 衬线 → Inter + Noto Sans SC 无衬线为主，保留 Long Cang 手写时钟
+- 卡片：纯色暗卡 → 磨砂玻璃（backdrop-blur-xl + 半透明白色底 + 柔光阴影）
+- 背景：暗色噪声纹理 → 暖色调多层径向渐变 blob + 细颗粒纹理
+- 导航栏/播放器：深色毛玻璃 → 亮色毛玻璃
+- VinylRecord：暗色标签 → 粉调亮色标签
+- 按钮：accent-on-dark → accent-on-white
+- 所有 text-murmur-deep → text-white（accent 按钮上）
+- 所有 bg-murmur-deep/70 遮罩 → bg-white/70
+
 ## 2026-06-07
+
+### 部署准备（⚠️ 待完成）
+- Fly.io 账号已登录（eatebanjeima@gmail.com），待绑定信用卡（免费层不扣费）
+- Dockerfile 多阶段构建就绪（前端 npm build + 后端 Flask/gunicorn）
+- fly.toml 配置：香港区域、512MB 内存、双持久卷（data + uploads）
+- `fly deploy` 一键部署，`fly secrets set JWT_SECRET=xxx` 设置密钥
+- 备用方案：wsgi.py + PythonAnywhere WSGI 配置
+
+### Flask 迁移
+- 后端框架从 FastAPI 切换到 Flask（PythonAnywhere 兼容性）
+- FastAPI main.py → Flask app.py（create_app 工厂模式）
+- 路由改造：@router.get → @bp.route，Form/File → request.form/files
+- JWT 认证：Depends → 自定义 @login_required 装饰器 + g.user
+- 删除 models.py（Pydantic → 原生 dict）
+- 新增依赖：flask、flask-cors、gunicorn
+
+### JWT 密钥安全
+- 移除 auth.py 中 JWT_SECRET 的硬编码 fallback
+- 改为 `os.getenv("JWT_SECRET") or secrets.token_hex(32)` 随机生成
+- .env 添加 JWT_SECRET 配置项
 
 ### 项目更名
 - "Murmur Nights / 夜深" → "小世界 · A Little World"
