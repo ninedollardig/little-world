@@ -26,4 +26,4 @@ ENV BACKEND_PORT=8080
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "python -c \"import os; print('JWT_SECRET=' + (os.getenv('JWT_SECRET') or 'auto-generated'[:20]+'...'))\" && uvicorn main:app --host 0.0.0.0 --port ${BACKEND_PORT:-8080}"]
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${BACKEND_PORT:-8080} --workers 2 'app:create_app()'"]
