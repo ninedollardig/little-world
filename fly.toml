@@ -14,10 +14,10 @@ primary_region = "hkg"
   cpu_kind = "shared"
   cpus = 1
 
-[mounts]
+[[mounts]]
   source = "little-world-data"
   destination = "/app/data"
 
-[mounts]
+[[mounts]]
   source = "little-world-uploads"
   destination = "/app/uploads"

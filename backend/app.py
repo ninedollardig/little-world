@@ -1,5 +1,4 @@
 import os
-import secrets
 from pathlib import Path
 from flask import Flask, send_from_directory
 from flask_cors import CORS
@@ -17,7 +16,9 @@ def create_app():
     app = Flask(__name__, static_folder=None)
     CORS(app, origins="*", supports_credentials=True)
 
-    app.config["JWT_SECRET"] = os.getenv("JWT_SECRET") or secrets.token_hex(32)
+    app.config["JWT_SECRET"] = os.getenv("JWT_SECRET")
+    if not app.config["JWT_SECRET"]:
+        raise RuntimeError("JWT_SECRET 环境变量未设置")
     app.config["UPLOAD_DIR"] = UPLOAD_DIR
     app.config["IMAGES_DIR"] = IMAGES_DIR
     app.config["FRONTEND_DIR"] = FRONTEND_DIR

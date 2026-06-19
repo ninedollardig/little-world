@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useRef, useCallback } from 'react'
 
+const API_BASE = import.meta.env.VITE_API_BASE || '/api'
+
 const AudioContext = createContext(null)
 
 export function AudioProvider({ children }) {
@@ -15,28 +17,6 @@ export function AudioProvider({ children }) {
   const playlistRef = useRef([])
   const playModeRef = useRef('sequential')
 
-  const playNext = useCallback(() => {
-    const list = playlistRef.current
-    if (!current || list.length === 0) return
-    const idx = list.findIndex((a) => a.id === current.id)
-    if (idx < 0 || idx >= list.length - 1) return
-    const next = list[idx + 1]
-    const el = new Audio(`/api/audio/${next.id}/stream`)
-    el.volume = volume
-    el.addEventListener('loadedmetadata', () => setDuration(el.duration))
-    el.addEventListener('timeupdate', () => setProgress(el.currentTime))
-    el.addEventListener('ended', () => {
-      // Don't call onEnded here, the handler is attached below
-    })
-    el.addEventListener('pause', () => setIsPlaying(false))
-    el.addEventListener('play', () => setIsPlaying(true))
-    audioRef.current = el
-    setCurrent(next)
-    setProgress(0)
-    setDuration(0)
-    el.play().catch(() => {})
-  }, [current, volume])
-
   const load = useCallback((audio, list = null) => {
     if (audioRef.current) {
       audioRef.current.pause()
@@ -47,7 +27,7 @@ export function AudioProvider({ children }) {
       playlistRef.current = list
     }
 
-    const el = new Audio(`/api/audio/${audio.id}/stream`)
+    const el = new Audio(`${API_BASE}/audio/${audio.id}/stream`)
     el.volume = volume
 
     const onEnded = () => {
@@ -61,7 +41,7 @@ export function AudioProvider({ children }) {
           const next = lst[idx + 1]
           // Load next track
           audioRef.current?.pause()
-          const nextEl = new Audio(`/api/audio/${next.id}/stream`)
+          const nextEl = new Audio(`${API_BASE}/audio/${next.id}/stream`)
           nextEl.volume = volume
           nextEl.addEventListener('loadedmetadata', () => setDuration(nextEl.duration))
           nextEl.addEventListener('timeupdate', () => setProgress(nextEl.currentTime))
@@ -91,6 +71,14 @@ export function AudioProvider({ children }) {
     setDuration(0)
     el.play().catch(() => {})
   }, [volume])
+
+  const playNext = useCallback(() => {
+    const list = playlistRef.current
+    if (!current || list.length === 0) return
+    const idx = list.findIndex((a) => a.id === current.id)
+    if (idx < 0 || idx >= list.length - 1) return
+    load(list[idx + 1])
+  }, [current, load])
 
   const togglePlayMode = useCallback(() => {
     const next = playMode === 'sequential' ? 'loop' : 'sequential'
